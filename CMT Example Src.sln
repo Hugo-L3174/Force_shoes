@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33801.468
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CMT Example Src", "CMT Example Src.vcxproj", "{5AF866BB-6AD0-48BD-BD9F-ACB5A2362A17}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5AF866BB-6AD0-48BD-BD9F-ACB5A2362A17}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5AF866BB-6AD0-48BD-BD9F-ACB5A2362A17}.Debug|Win32.Build.0 = Debug|Win32
+		{5AF866BB-6AD0-48BD-BD9F-ACB5A2362A17}.Release|Win32.ActiveCfg = Release|Win32
+		{5AF866BB-6AD0-48BD-BD9F-ACB5A2362A17}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B9CD6B07-F803-4BA3-8182-942D451FDFA0}
+	EndGlobalSection
+EndGlobal
