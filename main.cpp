@@ -84,50 +84,90 @@ int main(void)
 		printf("individual packet data size (according to outputmode) is : %d\n", packet->getDataSize());
 
 		printf("sample counter data (2bytes) is at position: %d\n", packet->getInfoList().m_sc);
-		/*//printf("raw inertial data (20bytes) position in individual packet 1 is : %d\n", packet->getInfoList().m_rawData);
+		//printf("raw inertial data (20bytes) position in individual packet 1 is : %d\n", packet->getInfoList().m_rawData);
 		//printf("auxiliary data (4bytes) position in individual packet 1 is : %d\n", packet->getInfoList().m_analogIn1);
-		printf("raw force 1 : G0: %d, G1: %d, G2: %d, G3: %d, G4: %d, G5: %d, G6: %d, ref: %d \n", 
-			packet->m_msg.getDataShort(packet->getInfoList(0).m_rawData + 20),
-			packet->m_msg.getDataShort(packet->getInfoList(0).m_rawData + 22), 
-			packet->m_msg.getDataShort(packet->getInfoList(0).m_rawData + 24),
-			packet->m_msg.getDataShort(packet->getInfoList(0).m_rawData + 26), 
-			packet->m_msg.getDataShort(packet->getInfoList(0).m_rawData + 28), 
-			packet->m_msg.getDataShort(packet->getInfoList(0).m_rawData + 30),
-			packet->m_msg.getDataShort(packet->getInfoList(0).m_rawData + 32),
-			packet->m_msg.getDataShort(packet->getInfoList(0).m_rawData + 34));
-		//packet->m_msg.getDataShort();
-		printf("raw byte data: %x %x\n", packet->m_msg.getDataByte(packet->getInfoList(0).m_rawData + 20), packet->m_msg.getDataByte(packet->getInfoList(0).m_rawData + 21));
-		printf("raw temp data is: %d \n", packet->m_msg.getDataShort(packet->getInfoList(0).m_rawData + 18));
-		printf("real raw temp data is: %d \n", packet->m_msg.getDataShort(packet->getInfoList(0).m_rawTemp));
-		printf("raw temp data from function is: %d \n", packet->getRawTemp());
+		//printf("raw force 1 : G0: %d, G1: %d, G2: %d, G3: %d, G4: %d, G5: %d, G6: %d, ref: %d \n", 
+		//	packet->m_msg.getDataShort(packet->getInfoList(0).m_rawData + 20),
+		//	packet->m_msg.getDataShort(packet->getInfoList(0).m_rawData + 22), 
+		//	packet->m_msg.getDataShort(packet->getInfoList(0).m_rawData + 24),
+		//	packet->m_msg.getDataShort(packet->getInfoList(0).m_rawData + 26), 
+		//	packet->m_msg.getDataShort(packet->getInfoList(0).m_rawData + 28), 
+		//	packet->m_msg.getDataShort(packet->getInfoList(0).m_rawData + 30),
+		//	packet->m_msg.getDataShort(packet->getInfoList(0).m_rawData + 32),
+		//	packet->m_msg.getDataShort(packet->getInfoList(0).m_rawData + 34));
+		////packet->m_msg.getDataShort();
+		//printf("raw byte data: %x %x\n", packet->m_msg.getDataByte(packet->getInfoList(0).m_rawData + 20), packet->m_msg.getDataByte(packet->getInfoList(0).m_rawData + 21));
+		//printf("raw temp data is: %d \n", packet->m_msg.getDataShort(packet->getInfoList(0).m_rawData + 18));
+		//printf("real raw temp data is: %d \n", packet->m_msg.getDataShort(packet->getInfoList(0).m_rawTemp));
+		//printf("raw temp data from function is: %d \n", packet->getRawTemp());
 
-		printf("raw mag z data is: %d \n", packet->m_msg.getDataShort(packet->getInfoList(0).m_rawData + 16));
-		printf("raw mag z data is: %x %x \n", packet->m_msg.getDataByte(packet->getInfoList(0).m_rawData + 16), packet->m_msg.getDataByte(packet->getInfoList(0).m_rawData + 17));
-		
+		//printf("raw mag z data is: %d \n", packet->m_msg.getDataShort(packet->getInfoList(0).m_rawData + 16));
+		//printf("raw mag z data is: %x %x \n", packet->m_msg.getDataByte(packet->getInfoList(0).m_rawData + 16), packet->m_msg.getDataByte(packet->getInfoList(0).m_rawData + 17));
+		//
 
 
-		printf("raw inertial data (20bytes) position in individual packet 2 is : %d\n", packet->getInfoList(1).m_rawData);
+		//printf("raw inertial data (20bytes) position in individual packet 2 is : %d\n", packet->getInfoList(1).m_rawData);
 		//printf("auxiliary data (4bytes) position in individual packet 2 is : %d\n", packet->getInfoList(1).m_analogIn1);
 		//printf("raw force 2 : G0: %d, G1: %d, G2: %d, G3: %d, G4: %d, G5: %d, G6: %d, ref: %d", packet->m_msg.getDataShort(packet->getInfoList(1).m_rawData + 20));
 
-		printf("raw inertial data (20bytes) position in individual packet 3 is : %d\n", packet->getInfoList(2).m_rawData);
+		//printf("raw inertial data (20bytes) position in individual packet 3 is : %d\n", packet->getInfoList(2).m_rawData);
 		//printf("auxiliary data (4bytes) position in individual packet 3 is : %d\n", packet->getInfoList(2).m_analogIn1);
 		//printf("raw force 3 : G0: %d, G1: %d, G2: %d, G3: %d, G4: %d, G5: %d, G6: %d, ref: %d", packet->m_msg.getDataShort(packet->getInfoList(2).m_rawData + 20));
 
-		printf("raw inertial data (20bytes) position in individual packet 4 is : %d\n", packet->getInfoList(3).m_rawData);
+		//printf("raw inertial data (20bytes) position in individual packet 4 is : %d\n", packet->getInfoList(3).m_rawData);
 		//printf("auxiliary data (4bytes) position in individual packet 4 is : %d\n", packet->getInfoList(3).m_analogIn1);
 		//printf("raw force 4 : G0: %d, G1: %d, G2: %d, G3: %d, G4: %d, G5: %d, G6: %d, ref: %d", packet->m_msg.getDataShort(packet->getInfoList(3).m_rawData + 20));
-		*/
+		
 		
 		printf("calibrated data acc (3 floats: 4*3=12bytes) in packet 1 is at: %d\n", packet->getInfoList(0).m_calAcc);
-		printf("worth %f, %f, %f\n", packet->getCalAcc().m_data[0], packet->getCalAcc().m_data[1], packet->getCalAcc().m_data[2]);
+		//printf("worth %f, %f, %f\n", packet->getCalAcc().m_data[0], packet->getCalAcc().m_data[1], packet->getCalAcc().m_data[2]);
 		printf("calibrated data gyr (3 floats: 4*3=12bytes) in packet 1 is at: %d\n", packet->getInfoList(0).m_calGyr);
 		printf("calibrated data mag (3 floats: 4*3=12bytes) in packet 1 is at: %d\n", packet->getInfoList(0).m_calMag);
 
-		printf("next data packet (raw force?) should be at: %d and is worth %d\n", packet->getInfoList(0).m_calMag + 12, packet->m_msg.getDataShort(packet->getInfoList(0).m_calMag + 12));
-		printf("after force is a new cal acc packet? at %d and is worth %f\n", packet->getInfoList(0).m_calMag + 12 + 16, packet->m_msg.getDataFloat(packet->getInfoList(0).m_calMag + 12 + 16));
-		//printf("actual next cal acc x is %d\n", )
-		printf("worth %f, %f, %f\n", packet->getCalAcc(1).m_data[0], packet->getCalAcc(1).m_data[1], packet->getCalAcc(1).m_data[2]);
+
+		printf("raw force 1 should be at: %d and is worth G0: %d, G1: %d, G2: %d, G3: %d, G4: %d, G5: %d, G6: %d, ref: %d\n", 
+			packet->getInfoList(0).m_calAcc + 1 * 3 * 12 + 0 * 16, 
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * 3 * 12 + 0 * 16 + 0),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * 3 * 12 + 0 * 16 + 2),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * 3 * 12 + 0 * 16 + 4),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * 3 * 12 + 0 * 16 + 6),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * 3 * 12 + 0 * 16 + 8),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * 3 * 12 + 0 * 16 + 10),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * 3 * 12 + 0 * 16 + 12),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * 3 * 12 + 0 * 16 + 14));
+		printf("raw force 2 should be at: %d and is worth G0: %d, G1: %d, G2: %d, G3: %d, G4: %d, G5: %d, G6: %d, ref: %d\n", 
+			packet->getInfoList(0).m_calAcc + 2 * 3 * 12 + 1 * 16,
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * 3 * 12 + 1 * 16 + 0),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * 3 * 12 + 1 * 16 + 2),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * 3 * 12 + 1 * 16 + 4),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * 3 * 12 + 1 * 16 + 6),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * 3 * 12 + 1 * 16 + 8),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * 3 * 12 + 1 * 16 + 10),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * 3 * 12 + 1 * 16 + 12),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * 3 * 12 + 1 * 16 + 14));
+			
+		printf("raw force 3 should be at: %d and is worth G0: %d, G1: %d, G2: %d, G3: %d, G4: %d, G5: %d, G6: %d, ref: %d\n", 
+			packet->getInfoList(0).m_calAcc + 3 * 3 * 12 + 2 * 16,
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * 3 * 12 + 2 * 16 + 0),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * 3 * 12 + 2 * 16 + 2),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * 3 * 12 + 2 * 16 + 4),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * 3 * 12 + 2 * 16 + 6),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * 3 * 12 + 2 * 16 + 8),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * 3 * 12 + 2 * 16 + 10),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * 3 * 12 + 2 * 16 + 12),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * 3 * 12 + 2 * 16 + 14));
+		printf("raw force 4 should be at: %d and is worth G0: %d, G1: %d, G2: %d, G3: %d, G4: %d, G5: %d, G6: %d, ref: %d\n", 
+			packet->getInfoList(0).m_calAcc + 4 * 3 * 12 + 3 * 16,
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * 3 * 12 + 3 * 16 + 0),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * 3 * 12 + 3 * 16 + 2),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * 3 * 12 + 3 * 16 + 4),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * 3 * 12 + 3 * 16 + 6),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * 3 * 12 + 3 * 16 + 8),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * 3 * 12 + 3 * 16 + 10),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * 3 * 12 + 3 * 16 + 12),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * 3 * 12 + 3 * 16 + 14));
+		//printf("after force is a new cal acc packet? at %d and is worth %f\n", packet->getInfoList(0).m_calMag + 12 + 16, packet->m_msg.getDataFloat(packet->getInfoList(0).m_calMag + 12 + 16));
+		//printf("worth %f, %f, %f\n", packet->getCalAcc(1).m_data[0], packet->getCalAcc(1).m_data[1], packet->getCalAcc(1).m_data[2]);
 
 		printf("message size without headers is : %d\n", packet->m_msg.getDataSize());
 		printf("real individual packet size is : %d\n", packet->m_msg.getDataSize()/4);
