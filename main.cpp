@@ -10,6 +10,9 @@
 // this macro tests for an error and exits the program with a message if there was one
 #define EXIT_ON_ERROR(res,comment) if (res != XRV_OK) { printf("Error %d occurred in " comment ": %s\n",res,xsensResultText(res)); exit(1); }
 
+#define CALIB_DATA_OFFSET	3*12 // 3*12 bytes
+#define RAWFORCE_OFFSET 16
+
 using namespace xsens;
 
 // used to signal that the user initiated the exit, so we do not wait for an extra keypress-
@@ -30,7 +33,7 @@ int main(void)
 	XsensResultValue res = XRV_OK;
 	short screenSkipFactor = 10;
 	short screenSkipFactorCnt = screenSkipFactor;
-	
+
 	// Set exit function
 	atexit(exitFunc);
 
@@ -39,14 +42,14 @@ int main(void)
 
 	// Give user a (short) chance to see hardware scan results
 	Sleep(2000);
-	
+
 	//clear screen present & get the user output mode selection.
 	clrscr();
 	getUserInputs();
 
 	// Set device to user input settings
 	doMtSettings();
-	
+
 	// Wait for first data item(s) to arrive. In production code, you would use a callback function instead (see cmtRegisterCallback function)
 	Sleep(20);
 
@@ -58,32 +61,144 @@ int main(void)
 	// vars for sample counter & temp.
 	unsigned short sdata = NULL;
 	double tdata;
-	
+
 	//structs to hold data.
-	CmtCalData caldata;
-	CmtQuat qat_data;
-	CmtEuler euler_data;
-	CmtMatrix matrix_data;
-	CmtwRaw raw_force;
+	CmtwRaw LFraw, LBraw, RFraw, RBraw;
+	URaw ULF, ULB, URF, URB;
+	force6d LF, LB, RF, RB;
 	Message message;
 
 	// Initialize packet for data
 	Packet* packet = new Packet((unsigned short)mtCount,cmt3.isXm());
+
+	// force unload
+	while (!userQuit && res == XRV_OK && sdata < 100)
+	{
+
+		cmt3.waitForDataMessage(packet);
+		sdata = packet->getSampleCounter();
+
+		LBraw = { shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 0)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 2)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 4)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 6)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 8)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 10)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 12)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 14)) };
+	
+		LBUnload[0] += LBraw.G0;
+		LBUnload[1] += LBraw.G1;
+		LBUnload[2] += LBraw.G2;
+		LBUnload[3] += LBraw.G3;
+		LBUnload[4] += LBraw.G4;
+		LBUnload[5] += LBraw.G5;
+
+
+		LFraw = { shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * CALIB_DATA_OFFSET + 1 * RAWFORCE_OFFSET + 0)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * CALIB_DATA_OFFSET + 1 * RAWFORCE_OFFSET + 2)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * CALIB_DATA_OFFSET + 1 * RAWFORCE_OFFSET + 4)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * CALIB_DATA_OFFSET + 1 * RAWFORCE_OFFSET + 6)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * CALIB_DATA_OFFSET + 1 * RAWFORCE_OFFSET + 8)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * CALIB_DATA_OFFSET + 1 * RAWFORCE_OFFSET + 10)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * CALIB_DATA_OFFSET + 1 * RAWFORCE_OFFSET + 12)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * CALIB_DATA_OFFSET + 1 * RAWFORCE_OFFSET + 14)) };
+
+		LFUnload[0] += LFraw.G0;
+		LFUnload[1] += LFraw.G1;
+		LFUnload[2] += LFraw.G2;
+		LFUnload[3] += LFraw.G3;
+		LFUnload[4] += LFraw.G4;
+		LFUnload[5] += LFraw.G5;
+		
+
+
+		RBraw = { shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * CALIB_DATA_OFFSET + 2 * RAWFORCE_OFFSET + 0)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * CALIB_DATA_OFFSET + 2 * RAWFORCE_OFFSET + 2)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * CALIB_DATA_OFFSET + 2 * RAWFORCE_OFFSET + 4)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * CALIB_DATA_OFFSET + 2 * RAWFORCE_OFFSET + 6)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * CALIB_DATA_OFFSET + 2 * RAWFORCE_OFFSET + 8)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * CALIB_DATA_OFFSET + 2 * RAWFORCE_OFFSET + 10)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * CALIB_DATA_OFFSET + 2 * RAWFORCE_OFFSET + 12)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * CALIB_DATA_OFFSET + 2 * RAWFORCE_OFFSET + 14)) };
+
+		RBUnload[0] += RBraw.G0;
+		RBUnload[1] += RBraw.G1;
+		RBUnload[2] += RBraw.G2;
+		RBUnload[3] += RBraw.G3;
+		RBUnload[4] += RBraw.G4;
+		RBUnload[5] += RBraw.G5;
+
+
+
+		RFraw = { shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * CALIB_DATA_OFFSET + 3 * RAWFORCE_OFFSET + 0)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * CALIB_DATA_OFFSET + 3 * RAWFORCE_OFFSET + 2)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * CALIB_DATA_OFFSET + 3 * RAWFORCE_OFFSET + 4)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * CALIB_DATA_OFFSET + 3 * RAWFORCE_OFFSET + 6)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * CALIB_DATA_OFFSET + 3 * RAWFORCE_OFFSET + 8)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * CALIB_DATA_OFFSET + 3 * RAWFORCE_OFFSET + 10)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * CALIB_DATA_OFFSET + 3 * RAWFORCE_OFFSET + 12)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * CALIB_DATA_OFFSET + 3 * RAWFORCE_OFFSET + 14)) };
+
+		RFUnload[0] += RFraw.G0;
+		RFUnload[1] += RFraw.G1;
+		RFUnload[2] += RFraw.G2;
+		RFUnload[3] += RFraw.G3;
+		RFUnload[4] += RFraw.G4;
+		RFUnload[5] += RFraw.G5;
+
+
+
+		if (_kbhit())
+			userQuit = 1;
+	}
+
+	for (int i = 0; i < 6; i++)
+	{
+		LBUnload[i] /= 100;
+	}
+
+	for (int i = 0; i < 6; i++)
+	{
+		LFUnload[i] /= 100;
+	}
+
+	for (int i = 0; i < 6; i++)
+	{
+		RBUnload[i] /= 100;
+	}
+
+	for (int i = 0; i < 6; i++)
+	{
+		RFUnload[i] /= 100;
+	}
+
+
+	printf("Unloaded voltages Left Back are G0: %.6f, G1: %.6f, G2: %.6f, G3: %.6f, G4: %.6f, G5: %.6f\n", LBUnload[0], LBUnload[1], LBUnload[2], LBUnload[3], LBUnload[4], LBUnload[5]);
+	printf("Unloaded voltages Left Front are G0: %.6f, G1: %.6f, G2: %.6f, G3: %.6f, G4: %.6f, G5: %.6f\n", LFUnload[0], LFUnload[1], LFUnload[2], LFUnload[3], LFUnload[4], LFUnload[5]);
+	printf("Unloaded voltages Right Back are G0: %.6f, G1: %.6f, G2: %.6f, G3: %.6f, G4: %.6f, G5: %.6f\n", RBUnload[0], RBUnload[1], RBUnload[2], RBUnload[3], RBUnload[4], RBUnload[5]);
+	printf("Unloaded voltages Right Front are G0: %.6f, G1: %.6f, G2: %.6f, G3: %.6f, G4: %.6f, G5: %.6f\n", RFUnload[0], RFUnload[1], RFUnload[2], RFUnload[3], RFUnload[4], RFUnload[5]);
 	
 
-	while(!userQuit && res == XRV_OK && sdata < 20)
+	while(!userQuit && res == XRV_OK && sdata < 20 )
 	{
 		
 		cmt3.waitForDataMessage(packet);
 
 		//get sample count, goto position & display.
 		sdata = packet->getSampleCounter();
+
+
 		//gotoxy(0,0);
 		printf("Sample Counter %05hu\n", sdata);
+		printf("total message size is : %d\n", packet->m_msg.getTotalMessageSize());
+		printf("message size without headers is : %d\n", packet->m_msg.getDataSize());
 		printf("number of data items in the message: %d\n", packet->m_itemCount);
 		printf("individual packet data size (according to outputmode) is : %d\n", packet->getDataSize());
+		printf("real individual packet size is : %d\n", packet->m_msg.getDataSize() / packet->m_itemCount);
 
 		printf("sample counter data (2bytes) is at position: %d\n", packet->getInfoList().m_sc);
+
 		//printf("raw inertial data (20bytes) position in individual packet 1 is : %d\n", packet->getInfoList().m_rawData);
 		//printf("auxiliary data (4bytes) position in individual packet 1 is : %d\n", packet->getInfoList().m_analogIn1);
 		//printf("raw force 1 : G0: %d, G1: %d, G2: %d, G3: %d, G4: %d, G5: %d, G6: %d, ref: %d \n", 
@@ -125,53 +240,81 @@ int main(void)
 		printf("calibrated data mag (3 floats: 4*3=12bytes) in packet 1 is at: %d\n", packet->getInfoList(0).m_calMag);
 
 
-		printf("raw force 1 should be at: %d and is worth G0: %d, G1: %d, G2: %d, G3: %d, G4: %d, G5: %d, G6: %d, ref: %d\n", 
-			packet->getInfoList(0).m_calAcc + 1 * 3 * 12 + 0 * 16, 
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * 3 * 12 + 0 * 16 + 0),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * 3 * 12 + 0 * 16 + 2),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * 3 * 12 + 0 * 16 + 4),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * 3 * 12 + 0 * 16 + 6),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * 3 * 12 + 0 * 16 + 8),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * 3 * 12 + 0 * 16 + 10),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * 3 * 12 + 0 * 16 + 12),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * 3 * 12 + 0 * 16 + 14));
-		printf("raw force 2 should be at: %d and is worth G0: %d, G1: %d, G2: %d, G3: %d, G4: %d, G5: %d, G6: %d, ref: %d\n", 
-			packet->getInfoList(0).m_calAcc + 2 * 3 * 12 + 1 * 16,
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * 3 * 12 + 1 * 16 + 0),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * 3 * 12 + 1 * 16 + 2),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * 3 * 12 + 1 * 16 + 4),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * 3 * 12 + 1 * 16 + 6),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * 3 * 12 + 1 * 16 + 8),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * 3 * 12 + 1 * 16 + 10),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * 3 * 12 + 1 * 16 + 12),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * 3 * 12 + 1 * 16 + 14));
-			
-		printf("raw force 3 should be at: %d and is worth G0: %d, G1: %d, G2: %d, G3: %d, G4: %d, G5: %d, G6: %d, ref: %d\n", 
-			packet->getInfoList(0).m_calAcc + 3 * 3 * 12 + 2 * 16,
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * 3 * 12 + 2 * 16 + 0),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * 3 * 12 + 2 * 16 + 2),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * 3 * 12 + 2 * 16 + 4),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * 3 * 12 + 2 * 16 + 6),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * 3 * 12 + 2 * 16 + 8),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * 3 * 12 + 2 * 16 + 10),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * 3 * 12 + 2 * 16 + 12),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * 3 * 12 + 2 * 16 + 14));
-		printf("raw force 4 should be at: %d and is worth G0: %d, G1: %d, G2: %d, G3: %d, G4: %d, G5: %d, G6: %d, ref: %d\n", 
-			packet->getInfoList(0).m_calAcc + 4 * 3 * 12 + 3 * 16,
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * 3 * 12 + 3 * 16 + 0),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * 3 * 12 + 3 * 16 + 2),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * 3 * 12 + 3 * 16 + 4),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * 3 * 12 + 3 * 16 + 6),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * 3 * 12 + 3 * 16 + 8),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * 3 * 12 + 3 * 16 + 10),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * 3 * 12 + 3 * 16 + 12),
-				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * 3 * 12 + 3 * 16 + 14));
+		/*printf("raw force 1 should be at: %d and is worth G0: %d, G1: %d, G2: %d, G3: %d, G4: %d, G5: %d, G6: %d, ref: %d\n", 
+			packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET,
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 0),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 2),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 4),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 6),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 8),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 10),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 12),
+				packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 14));*/
+
+		LBraw = {  shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 0)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 2)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 4)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 6)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 8)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 10)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 12)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET + 14))};
+
+		ULB = {LBraw.G0, LBraw.G1, LBraw.G2, LBraw.G3, LBraw.G4, LBraw.G5};
+		
+
+		printf("raw force 1 should be at: %d and is worth G0: %.6f, G1: %.6f, G2: %.6f, G3: %.6f, G4: %.6f, G5: %.6f, G6: %.6f, ref: %.6f\n",
+			packet->getInfoList(0).m_calAcc + 1 * CALIB_DATA_OFFSET + 0 * RAWFORCE_OFFSET, LBraw.G0, LBraw.G1, LBraw.G2, LBraw.G3, LBraw.G4, LBraw.G5, LBraw.G6, LBraw.ref);
+
+
+		LFraw = {  shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * CALIB_DATA_OFFSET + 1 * RAWFORCE_OFFSET + 0)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * CALIB_DATA_OFFSET + 1 * RAWFORCE_OFFSET + 2)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * CALIB_DATA_OFFSET + 1 * RAWFORCE_OFFSET + 4)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * CALIB_DATA_OFFSET + 1 * RAWFORCE_OFFSET + 6)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * CALIB_DATA_OFFSET + 1 * RAWFORCE_OFFSET + 8)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * CALIB_DATA_OFFSET + 1 * RAWFORCE_OFFSET + 10)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * CALIB_DATA_OFFSET + 1 * RAWFORCE_OFFSET + 12)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 2 * CALIB_DATA_OFFSET + 1 * RAWFORCE_OFFSET + 14)) };
+
+		ULF = { LFraw.G0, LFraw.G1, LFraw.G2, LFraw.G3, LFraw.G4, LFraw.G5 };
+
+		printf("raw force 2 should be at: %d and is worth G0: %.6f, G1: %.6f, G2: %.6f, G3: %.6f, G4: %.6f, G5: %.6f, G6: %.6f, ref: %.6f\n", 
+			packet->getInfoList(0).m_calAcc + 2 * CALIB_DATA_OFFSET + 1 * RAWFORCE_OFFSET, LFraw.G0, LFraw.G1, LFraw.G2, LFraw.G3, LFraw.G4, LFraw.G5, LFraw.G6, LFraw.ref);
+
+		
+		RBraw = {  shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * CALIB_DATA_OFFSET + 2 * RAWFORCE_OFFSET + 0)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * CALIB_DATA_OFFSET + 2 * RAWFORCE_OFFSET + 2)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * CALIB_DATA_OFFSET + 2 * RAWFORCE_OFFSET + 4)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * CALIB_DATA_OFFSET + 2 * RAWFORCE_OFFSET + 6)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * CALIB_DATA_OFFSET + 2 * RAWFORCE_OFFSET + 8)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * CALIB_DATA_OFFSET + 2 * RAWFORCE_OFFSET + 10)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * CALIB_DATA_OFFSET + 2 * RAWFORCE_OFFSET + 12)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 3 * CALIB_DATA_OFFSET + 2 * RAWFORCE_OFFSET + 14)) };
+
+		URB = { RBraw.G0, RBraw.G1, RBraw.G2, RBraw.G3, RBraw.G4, RBraw.G5 };
+
+		printf("raw force 3 should be at: %d and is worth G0: %.6f, G1: %.6f, G2: %.6f, G3: %.6f, G4: %.6f, G5: %.6f, G6: %.6f, ref: %.6f\n", 
+			packet->getInfoList(0).m_calAcc + 3 * CALIB_DATA_OFFSET + 2 * RAWFORCE_OFFSET, RBraw.G0, RBraw.G1, RBraw.G2, RBraw.G3, RBraw.G4, RBraw.G5, RBraw.G6, RBraw.ref);
+
+		
+		RFraw = {  shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * CALIB_DATA_OFFSET + 3 * RAWFORCE_OFFSET + 0)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * CALIB_DATA_OFFSET + 3 * RAWFORCE_OFFSET + 2)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * CALIB_DATA_OFFSET + 3 * RAWFORCE_OFFSET + 4)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * CALIB_DATA_OFFSET + 3 * RAWFORCE_OFFSET + 6)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * CALIB_DATA_OFFSET + 3 * RAWFORCE_OFFSET + 8)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * CALIB_DATA_OFFSET + 3 * RAWFORCE_OFFSET + 10)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * CALIB_DATA_OFFSET + 3 * RAWFORCE_OFFSET + 12)),
+				shortToVolts(packet->m_msg.getDataShort(packet->getInfoList(0).m_calAcc + 4 * CALIB_DATA_OFFSET + 3 * RAWFORCE_OFFSET + 14)) };
+
+		URF = { RFraw.G0, RFraw.G1, RFraw.G2, RFraw.G3, RFraw.G4, RFraw.G5 };
+
+		printf("raw force 4 should be at: %d and is worth G0: %.6f, G1: %.6f, G2: %.6f, G3: %.6f, G4: %.6f, G5: %.6f, G6: %.6f, ref: %.6f\n\n", 
+			packet->getInfoList(0).m_calAcc + 4 * CALIB_DATA_OFFSET + 3 * RAWFORCE_OFFSET, RFraw.G0, RFraw.G1, RFraw.G2, RFraw.G3, RFraw.G4, RFraw.G5, RFraw.G6, RFraw.ref);
+
+		
 		//printf("after force is a new cal acc packet? at %d and is worth %f\n", packet->getInfoList(0).m_calMag + 12 + 16, packet->m_msg.getDataFloat(packet->getInfoList(0).m_calMag + 12 + 16));
 		//printf("worth %f, %f, %f\n", packet->getCalAcc(1).m_data[0], packet->getCalAcc(1).m_data[1], packet->getCalAcc(1).m_data[2]);
 
-		printf("message size without headers is : %d\n", packet->m_msg.getDataSize());
-		printf("real individual packet size is : %d\n", packet->m_msg.getDataSize()/4);
-		printf("total message size is : %d\n\n", packet->m_msg.getTotalMessageSize());
 		
 
 		if (screenSkipFactorCnt++ == screenSkipFactor) {
@@ -196,17 +339,14 @@ int main(void)
 	return 0;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Return the current value of the data as an int16_t (16 bits).
-int16_t getDataSignShort(const uint16_t offset)
-{
-	int16_t ret;
-	int8_t* dest = (int8_t*)&ret;
-	int8_t* src = 0/*&(getDataStart()[offset]) */ ;
-	dest[0] = src[1];
-	dest[1] = src[0];
 
-	return ret;
+//////////////////////////////////////////////////////////////////////////////////////////
+// Convert the short raw value to the voltage in float.
+double shortToVolts(const uint16_t raw)
+{
+	double U = double(raw);
+	U *= 4.999924 / 65535;
+	return U;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -265,19 +405,16 @@ void getUserInputs()
 {
 	mode = 7;
 	//do{
-	//	printf("Select desired output:\n");
-	//	printf("1 - Calibrated data\n");
-	//	printf("2 - Orientation data\n");
-	//	printf("3 - Both Calibrated and Orientation data\n");
-	//	printf("4 - Temperature and Calibrated data\n");
-	//	printf("5 - Temperature and Orientation data\n");
-	//	printf("6 - Temperature, Calibrated and Orientation data\n");
+	//	printf("Select operation:\n");
+	//	printf("1 - Force shoes unloaded \n");
+	//	printf("2 - Measure and print data\n");
+	//	printf("3 - Measure, print and send data\n");
 	//	printf("Enter your choice: ");
 	//	scanf_s("%d", &mode);
 	//	// flush stdin
 	//	while (getchar() != '\n') continue;
 
-	//	if (mode < 1 || mode > 6) {
+	//	if (mode < 1 || mode > 3) {
 	//		printf("\n\nPlease enter a valid output mode\n");
 	//	}
 	//}while(mode < 1 || mode > 6);
