@@ -1,16 +1,3 @@
-void doHardwareScan();
-void doMtSettings(void);
-void getUserInputs(void);
-void calcScreenOffset(void);
-void writeHeaders(void);
-void clrscr(void);
-void gotoxy(int x, int y);
-void exitFunc(void);
-double shortToVolts(const uint16_t raw);
-
-
-void UnloadedFS(void);
-double LFUnload[6], LBUnload[6], RFUnload[6], RBUnload[6] = { 0., 0., 0., 0., 0., 0. };
 
 // Raw data vector from the force sensor (converted from short to voltage in double)
 struct CmtwRaw
@@ -25,16 +12,27 @@ struct CmtwRaw
 	double ref;
 };
 
-// Raw voltages vector from the force sensor
-struct URaw
-{
-	double G0;
-	double G1;
-	double G2;
-	double G3;
-	double G4;
-	double G5;
-};
+void doHardwareScan();
+void doMtSettings(void);
+void getUserInputs(void);
+void calcScreenOffset(void);
+void writeHeaders(void);
+void clrscr(void);
+void gotoxy(int x, int y);
+void exitFunc(void);
+double shortToVolts(const uint16_t raw);
+
+void UnloadedFS(CmtwRaw LBraw, CmtwRaw LFraw, CmtwRaw RBraw, CmtwRaw RFraw);
+void computeAmpCalMat(CmtwRaw LB, CmtwRaw LF, CmtwRaw RB, CmtwRaw RF);
+void computeUDiff(CmtwRaw LB, CmtwRaw LF, CmtwRaw RB, CmtwRaw RF);
+void computeForceVec();
+
+// Unloaded voltage measure of force shoes
+double LFUnload[6], LBUnload[6], RFUnload[6], RBUnload[6] = { 0., 0., 0., 0., 0., 0. };
+// Difference between measured voltage and unloaded
+double LFdiff[6], LBdiff[6], RFdiff[6], RBdiff[6] = { 0., 0., 0., 0., 0., 0. };
+// Raw data vectors
+double LFraw[8], LBraw[8], RFraw[8], RBraw[8] = { 0., 0., 0., 0., 0., 0., 0., 0. };
 
 
 // Processed F/T vector after calculations: result of ampCalMat[6][6]*diffVoltages[6]
@@ -48,6 +46,9 @@ struct force6d
 	double Tz;
 };
 
+double ampCalMatLF[6][6], ampCalMatLB[6][6], ampCalMatRF[6][6], ampCalMatRB[6][6];
+
+#define ampGain 4.7
 
 // This is the raw calibration matrix for the force sensor FT15247 (Left Front)
 double rawCalMatLF[6][6] = {
