@@ -121,16 +121,19 @@ int main(void)
 		printf("%.6f\t%.6f\t%.6f", LBforcevec[0], LBforcevec[1], LBforcevec[2]);
 		gotoxy(0, 7 + 0 * screenSensorOffset);
 		printf("%.6f\t%.6f\t%.6f", LBforcevec[3], LBforcevec[4], LBforcevec[5]);
-		
+
+
 		gotoxy(0, 5 + 1 * screenSensorOffset);
 		printf("%.6f\t%.6f\t%.6f", LFforcevec[0], LFforcevec[1], LFforcevec[2]);
 		gotoxy(0, 7 + 1 * screenSensorOffset);
 		printf("%.6f\t%.6f\t%.6f", LFforcevec[3], LFforcevec[4], LFforcevec[5]);
+
 		
 		gotoxy(0, 5 + 2 * screenSensorOffset);
 		printf("%.6f\t%.6f\t%.6f", RBforcevec[0], RBforcevec[1], RBforcevec[2]);
 		gotoxy(0, 7 + 2 * screenSensorOffset);
 		printf("%.6f\t%.6f\t%.6f", RBforcevec[3], RBforcevec[4], RBforcevec[5]);
+
 		
 		gotoxy(0, 5 + 3 * screenSensorOffset);
 		printf("%.6f\t%.6f\t%.6f", RFforcevec[0], RFforcevec[1], RFforcevec[2]);
@@ -166,7 +169,7 @@ void UnloadedFS()
 {
 	Packet* packet = new Packet((unsigned short)mtCount, cmt3.isXm());
 	// force unload
-	while (!userQuit && res == XRV_OK && sdata < 100)
+	while (!userQuit && res == XRV_OK && sdata < 99)
 	{
 		cmt3.waitForDataMessage(packet);
 		sdata = packet->getSampleCounter();
@@ -422,14 +425,16 @@ void writeHeaders()
 		printf("Calibrated sensor data");
 		gotoxy(0,4 + i * screenSensorOffset);
 		printf(" Fx\t \t Fy\t \t Fz");
-		gotoxy(23, 5 + i * screenSensorOffset);
-		printf("N");
+		gotoxy(43, 5 + i * screenSensorOffset);
+		printf("Newtons");
 		gotoxy(0,6 + i * screenSensorOffset);
 		printf(" Tx\t \t Ty\t \t Tz");
-		gotoxy(23, 7 + i * screenSensorOffset);
+		gotoxy(43, 7 + i * screenSensorOffset);
 		printf("N.m");
-		gotoxy(0,8 + i * screenSensorOffset);
-
+		gotoxy(0, 8 + i * screenSensorOffset);
+		/*printf("Udiff is:");
+		gotoxy(0, 9 + i * screenSensorOffset);*/
+			
 		
 		
 
