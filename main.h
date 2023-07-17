@@ -1,16 +1,12 @@
 
-// Raw data vector from the force sensor (converted from short to voltage in double)
-struct CmtwRaw
-{
-	double G0;
-	double G1;
-	double G2;
-	double G3;
-	double G4;
-	double G5;
-	double G6;
-	double ref;
-};
+#include <stdio.h>		// Needed for printf etc
+#include <objbase.h>	// Needed for COM functionality
+#include "cmt3.h"
+#include "xsens_list.h"
+#include "cmtscan.h"
+#include <conio.h>		// included for _getch and _kbhit
+using namespace xsens;
+#define ampGain 4.7
 
 void doHardwareScan();
 void doMtSettings(void);
@@ -22,33 +18,27 @@ void gotoxy(int x, int y);
 void exitFunc(void);
 double shortToVolts(const uint16_t raw);
 
-void UnloadedFS(CmtwRaw LBraw, CmtwRaw LFraw, CmtwRaw RBraw, CmtwRaw RFraw);
-void computeAmpCalMat(CmtwRaw LB, CmtwRaw LF, CmtwRaw RB, CmtwRaw RF);
-void computeUDiff(CmtwRaw LB, CmtwRaw LF, CmtwRaw RB, CmtwRaw RF);
-void computeForceVec();
+
+void UnloadedFS();
+void computeAmpCalMat();
+void computeUDiff();
+void computeForceVec(void);
 
 // Unloaded voltage measure of force shoes
 double LFUnload[6], LBUnload[6], RFUnload[6], RBUnload[6] = { 0., 0., 0., 0., 0., 0. };
+
 // Difference between measured voltage and unloaded
 double LFdiff[6], LBdiff[6], RFdiff[6], RBdiff[6] = { 0., 0., 0., 0., 0., 0. };
-// Raw data vectors
+
+// Raw data vectors (G0, G1, G2, G3, G4, G5, G6, ref)
 double LFraw[8], LBraw[8], RFraw[8], RBraw[8] = { 0., 0., 0., 0., 0., 0., 0., 0. };
 
-
 // Processed F/T vector after calculations: result of ampCalMat[6][6]*diffVoltages[6]
-struct force6d
-{
-	double Fx;
-	double Fy;
-	double Fz;
-	double Tx;
-	double Ty;
-	double Tz;
-};
+double LFforcevec[6], LBforcevec[6], RFforcevec[6], RBforcevec[6] = { 0., 0., 0., 0., 0., 0. };
 
+// Amplified calibration matrixes: result of rawCalMat/amplifierGain/Excitation voltage
 double ampCalMatLF[6][6], ampCalMatLB[6][6], ampCalMatRF[6][6], ampCalMatRB[6][6];
 
-#define ampGain 4.7
 
 // This is the raw calibration matrix for the force sensor FT15247 (Left Front)
 double rawCalMatLF[6][6] = {
